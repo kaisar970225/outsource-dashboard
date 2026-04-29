@@ -1,0 +1,67 @@
+{
+    "employees": [
+        {
+            "id": "emp-1",
+            "name": "Kaisar",
+            "surname": "Akhmetov",
+            "dob": "1998-03-12",
+            "position": "Junior",
+            "salary": 1200,
+            "assignments": [],
+            "vacationDays": []
+        },
+        {
+            "id": "emp-2",
+            "name": "Aisha",
+            "surname": "Bekova",
+            "dob": "1993-07-19",
+            "position": "Middle",
+            "salary": 2500,
+            "assignments": [],
+            "vacationDays": []
+        },
+        {
+            "id": "emp-3",
+            "name": "Ruslan",
+            "surname": "Nurmagambetov",
+            "dob": "1989-11-04",
+            "position": "Senior",
+            "salary": 3800,
+            "assignments": [],
+            "vacationDays": []
+        },
+        {
+            "id": "emp-4",
+            "name": "Zarina",
+            "surname": "Dzhaksybekova",
+            "dob": "1995-01-28",
+            "position": "Lead",
+            "salary": 5000,
+            "assignments": [],
+            "vacationDays": []
+        }
+    ],
+    "projects": [
+        {
+            "id": "proj-1",
+            "name": "CRM Platform",
+            "company": "Kaspi Solutions",
+            "budget": 18000,
+            "capacity": 2
+        },
+        {
+            "id": "proj-2",
+            "name": "Logistics Tracker",
+            "company": "Qazaq Logistics",
+            "budget": 25000,
+            "capacity": 3
+        },
+        {
+            "id": "proj-3",
+            "name": "HR Portal",
+            "company": "StepApp KZ",
+            "budget": 12000,
+            "capacity": 1
+        }
+    ]
+}
