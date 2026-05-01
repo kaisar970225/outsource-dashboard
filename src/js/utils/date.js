@@ -1,4 +1,4 @@
-javascript; // Возвращает количество рабочих дней в месяце (без выходных)
+// Возвращает количество рабочих дней в месяце (без выходных)
 // Например: январь 2026 → 22
 export function getWorkingDays(year, month) {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
