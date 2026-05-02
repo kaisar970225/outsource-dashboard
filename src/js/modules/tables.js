@@ -1,4 +1,5 @@
 import { getCurrentMonthData, saveCurrentMonth } from "../state/appState.js";
+import { getFilteredProjects, getFilteredEmployees } from "./sortFilter.js";
 import { formatCurrency, calcAge } from "../utils/format.js";
 import { calcVacationCoefficient } from "../utils/date.js";
 
@@ -47,10 +48,11 @@ function calcEmployeeCost(salary, capacity) {
 // Отрисовывает таблицу проектов
 export function renderProjectsTable(year, month) {
     var data = getCurrentMonthData();
+    var projects = getFilteredProjects(year, month);
     var tbody = document.getElementById("projectsBody");
     tbody.innerHTML = "";
 
-    if (data.projects.length === 0) {
+    if (projects.length === 0) {
         var emptyRow = document.createElement("tr");
         emptyRow.innerHTML =
             '<td colspan="7" style="text-align:center;padding:20px;color:#999;">No projects yet. Click + Add Project to start.</td>';
@@ -58,8 +60,8 @@ export function renderProjectsTable(year, month) {
         return;
     }
 
-    for (var i = 0; i < data.projects.length; i++) {
-        var project = data.projects[i];
+    for (var i = 0; i < projects.length; i++) {
+        var project = projects[i];
 
         // Находим всех сотрудников назначенных на этот проект
         var assignedEmployees = [];
@@ -237,10 +239,11 @@ function renderTotalIncome(year, month) {
 // Отрисовывает таблицу сотрудников
 export function renderEmployeesTable(year, month) {
     var data = getCurrentMonthData();
+    var employees = getFilteredEmployees(year, month);
     var tbody = document.getElementById("employeesBody");
     tbody.innerHTML = "";
 
-    if (data.employees.length === 0) {
+    if (employees.length === 0) {
         var emptyRow = document.createElement("tr");
         emptyRow.innerHTML =
             '<td colspan="9" style="text-align:center;padding:20px;color:#999;">No employees yet. Click + Add Employee to start.</td>';
@@ -248,8 +251,8 @@ export function renderEmployeesTable(year, month) {
         return;
     }
 
-    for (var i = 0; i < data.employees.length; i++) {
-        var emp = data.employees[i];
+    for (var i = 0; i < employees.length; i++) {
+        var emp = employees[i];
         var age = calcAge(emp.dob);
 
         // Считаем общую назначенную мощность

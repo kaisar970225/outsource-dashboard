@@ -6,7 +6,6 @@ import {
     setCurrentYear,
     setCurrentMonth,
     setCurrentView,
-    getCurrentView,
     saveCurrentMonth,
     getCurrentMonthData,
 } from "./js/state/appState.js";
@@ -19,18 +18,25 @@ import {
     deleteProject,
     addEmployee,
     deleteEmployee,
-    updateEmployeePosition,
-    updateEmployeeSalary,
 } from "./js/modules/crud.js";
+import {
+    validateProjectForm,
+    validateEmployeeForm,
+} from "./js/modules/validation.js";
 import {
     showAssignPopup,
     showProjectEmployeesModal,
     showEmployeeAssignmentsModal,
 } from "./js/modules/assignments.js";
 import {
-    validateProjectForm,
-    validateEmployeeForm,
-} from "./js/modules/validation.js";
+    setProjectSort,
+    setEmployeeSort,
+    showFilterPopup,
+    removeFilter,
+    clearAllFilters,
+    renderProjectFilterChips,
+    renderEmployeeFilterChips,
+} from "./js/modules/sortFilter.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     initState();
@@ -38,25 +44,20 @@ document.addEventListener("DOMContentLoaded", function () {
     var year = getCurrentYear();
     var month = getCurrentMonth();
 
-    // Устанавливаем правильный месяц и год в селекторах
     document.getElementById("monthSelect").value = month;
     document.getElementById("yearSelect").value = year;
 
-    // Отрисовываем таблицы
     renderProjectsTable(year, month);
     renderEmployeesTable(year, month);
 
     // ==================== БОКОВАЯ ПАНЕЛЬ ====================
 
-    // Сворачивание боковой панели
     document
         .getElementById("sidebarToggle")
         .addEventListener("click", function () {
-            var sidebar = document.getElementById("sidebar");
-            sidebar.classList.toggle("collapsed");
+            document.getElementById("sidebar").classList.toggle("collapsed");
         });
 
-    // Смена месяца
     document
         .getElementById("monthSelect")
         .addEventListener("change", function () {
@@ -65,7 +66,6 @@ document.addEventListener("DOMContentLoaded", function () {
             renderEmployeesTable(getCurrentYear(), getCurrentMonth());
         });
 
-    // Смена года
     document
         .getElementById("yearSelect")
         .addEventListener("change", function () {
@@ -74,7 +74,6 @@ document.addEventListener("DOMContentLoaded", function () {
             renderEmployeesTable(getCurrentYear(), getCurrentMonth());
         });
 
-    // Переключение вкладок
     document
         .getElementById("btnProjects")
         .addEventListener("click", function () {
@@ -95,7 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
             setCurrentView("employees");
         });
 
-    // ==================== ПАНЕЛЬ ДОБАВЛЕНИЯ ПРОЕКТА ====================
+    // ==================== ДОБАВЛЕНИЕ ПРОЕКТА ====================
 
     document
         .getElementById("addProjectBtn")
@@ -111,7 +110,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 .classList.remove("open");
         });
 
-    // Валидация в реальном времени
     document
         .getElementById("projectName")
         .addEventListener("input", validateProjectForm);
@@ -125,7 +123,6 @@ document.addEventListener("DOMContentLoaded", function () {
         .getElementById("projectCapacity")
         .addEventListener("input", validateProjectForm);
 
-    // Отправка формы проекта
     document
         .getElementById("submitProject")
         .addEventListener("click", function () {
@@ -136,7 +133,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     .value.trim();
                 var budget = document.getElementById("projectBudget").value;
                 var capacity = document.getElementById("projectCapacity").value;
-
                 addProject(
                     name,
                     company,
@@ -145,8 +141,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     getCurrentYear(),
                     getCurrentMonth(),
                 );
-
-                // Очищаем форму и закрываем панель
                 document.getElementById("projectName").value = "";
                 document.getElementById("projectCompany").value = "";
                 document.getElementById("projectBudget").value = "";
@@ -157,7 +151,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
 
-    // ==================== ПАНЕЛЬ ДОБАВЛЕНИЯ СОТРУДНИКА ====================
+    // ==================== ДОБАВЛЕНИЕ СОТРУДНИКА ====================
 
     document
         .getElementById("addEmployeeBtn")
@@ -173,7 +167,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 .classList.remove("open");
         });
 
-    // Валидация в реальном времени
     document
         .getElementById("empName")
         .addEventListener("input", validateEmployeeForm);
@@ -190,7 +183,6 @@ document.addEventListener("DOMContentLoaded", function () {
         .getElementById("empSalary")
         .addEventListener("input", validateEmployeeForm);
 
-    // Отправка формы сотрудника
     document
         .getElementById("submitEmployee")
         .addEventListener("click", function () {
@@ -202,7 +194,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 var dob = document.getElementById("empDob").value;
                 var position = document.getElementById("empPosition").value;
                 var salary = document.getElementById("empSalary").value;
-
                 addEmployee(
                     name,
                     surname,
@@ -212,8 +203,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     getCurrentYear(),
                     getCurrentMonth(),
                 );
-
-                // Очищаем форму и закрываем панель
                 document.getElementById("empName").value = "";
                 document.getElementById("empSurname").value = "";
                 document.getElementById("empDob").value = "";
@@ -225,70 +214,78 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
 
-    // ==================== КНОПКИ В ТАБЛИЦАХ ====================
+    // ==================== КНОПКИ В ТАБЛИЦЕ ПРОЕКТОВ ====================
 
-    // Делегирование событий — слушаем клики на tbody
-    // Это лучше чем вешать обработчик на каждую кнопку отдельно
     document
         .getElementById("projectsBody")
         .addEventListener("click", function (e) {
             var target = e.target;
 
-            // Удаление проекта
             if (target.classList.contains("delete-project-btn")) {
                 var projectId = target.getAttribute("data-project-id");
                 var data = getCurrentMonthData();
-                var project = null;
                 for (var i = 0; i < data.projects.length; i++) {
                     if (data.projects[i].id === projectId) {
-                        project = data.projects[i];
+                        if (
+                            confirm(
+                                'Delete project "' +
+                                    data.projects[i].name +
+                                    '"?',
+                            )
+                        ) {
+                            deleteProject(
+                                projectId,
+                                getCurrentYear(),
+                                getCurrentMonth(),
+                            );
+                        }
                         break;
                     }
                 }
-                if (
-                    project &&
-                    confirm('Delete project "' + project.name + '"?')
-                ) {
-                    deleteProject(
-                        projectId,
-                        getCurrentYear(),
-                        getCurrentMonth(),
-                    );
-                }
+            }
+
+            if (target.classList.contains("show-employees-btn")) {
+                var projectId = target.getAttribute("data-project-id");
+                showProjectEmployeesModal(
+                    projectId,
+                    getCurrentYear(),
+                    getCurrentMonth(),
+                );
             }
         });
+
+    // ==================== КНОПКИ В ТАБЛИЦЕ СОТРУДНИКОВ ====================
 
     document
         .getElementById("employeesBody")
         .addEventListener("click", function (e) {
             var target = e.target;
 
-            // Удаление сотрудника
             if (target.classList.contains("delete-emp-btn")) {
                 var empId = target.getAttribute("data-emp-id");
                 var data = getCurrentMonthData();
-                var emp = null;
                 for (var i = 0; i < data.employees.length; i++) {
                     if (data.employees[i].id === empId) {
-                        emp = data.employees[i];
+                        if (
+                            confirm(
+                                'Delete employee "' +
+                                    data.employees[i].name +
+                                    " " +
+                                    data.employees[i].surname +
+                                    '"?',
+                            )
+                        ) {
+                            deleteEmployee(
+                                empId,
+                                getCurrentYear(),
+                                getCurrentMonth(),
+                            );
+                        }
                         break;
                     }
                 }
-                if (
-                    emp &&
-                    confirm(
-                        'Delete employee "' +
-                            emp.name +
-                            " " +
-                            emp.surname +
-                            '"?',
-                    )
-                ) {
-                    deleteEmployee(empId, getCurrentYear(), getCurrentMonth());
-                }
             }
 
-            // Кнопка назначить
             if (target.classList.contains("assign-btn")) {
                 var empId = target.getAttribute("data-emp-id");
                 showAssignPopup(
@@ -299,7 +296,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 );
             }
 
-            // Показать назначения сотрудника
             if (target.classList.contains("show-assignments-btn")) {
                 var empId = target.getAttribute("data-emp-id");
                 showEmployeeAssignmentsModal(
@@ -310,19 +306,97 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
 
+    // ==================== СОРТИРОВКА И ФИЛЬТРАЦИЯ ====================
+
     document
-        .getElementById("projectsBody")
+        .getElementById("projectsTable")
         .addEventListener("click", function (e) {
             var target = e.target;
-
-            // Показать сотрудников проекта
-            if (target.classList.contains("show-employees-btn")) {
-                var projectId = target.getAttribute("data-project-id");
-                showProjectEmployeesModal(
-                    projectId,
+            if (target.classList.contains("sort-icon")) {
+                setProjectSort(target.getAttribute("data-col"));
+                renderProjectsTable(getCurrentYear(), getCurrentMonth());
+            }
+            if (target.classList.contains("filter-icon")) {
+                showFilterPopup(
+                    target.getAttribute("data-col"),
+                    "projects",
+                    target,
                     getCurrentYear(),
                     getCurrentMonth(),
                 );
+            }
+        });
+
+    document
+        .getElementById("employeesTable")
+        .addEventListener("click", function (e) {
+            var target = e.target;
+            if (target.classList.contains("sort-icon")) {
+                setEmployeeSort(target.getAttribute("data-col"));
+                renderEmployeesTable(getCurrentYear(), getCurrentMonth());
+            }
+            if (target.classList.contains("filter-icon")) {
+                showFilterPopup(
+                    target.getAttribute("data-col"),
+                    "employees",
+                    target,
+                    getCurrentYear(),
+                    getCurrentMonth(),
+                );
+            }
+        });
+
+    // ==================== ЧИПЫ ФИЛЬТРОВ ====================
+
+    document
+        .getElementById("projectFilterChips")
+        .addEventListener("click", function (e) {
+            var target = e.target;
+            if (
+                target.tagName === "BUTTON" &&
+                target.getAttribute("data-col")
+            ) {
+                removeFilter(
+                    target.getAttribute("data-col"),
+                    "projects",
+                    getCurrentYear(),
+                    getCurrentMonth(),
+                );
+                renderProjectsTable(getCurrentYear(), getCurrentMonth());
+            }
+            if (target.classList.contains("clear-filters-btn")) {
+                clearAllFilters(
+                    "projects",
+                    getCurrentYear(),
+                    getCurrentMonth(),
+                );
+                renderProjectsTable(getCurrentYear(), getCurrentMonth());
+            }
+        });
+
+    document
+        .getElementById("employeeFilterChips")
+        .addEventListener("click", function (e) {
+            var target = e.target;
+            if (
+                target.tagName === "BUTTON" &&
+                target.getAttribute("data-col")
+            ) {
+                removeFilter(
+                    target.getAttribute("data-col"),
+                    "employees",
+                    getCurrentYear(),
+                    getCurrentMonth(),
+                );
+                renderEmployeesTable(getCurrentYear(), getCurrentMonth());
+            }
+            if (target.classList.contains("clear-filters-btn")) {
+                clearAllFilters(
+                    "employees",
+                    getCurrentYear(),
+                    getCurrentMonth(),
+                );
+                renderEmployeesTable(getCurrentYear(), getCurrentMonth());
             }
         });
 });
