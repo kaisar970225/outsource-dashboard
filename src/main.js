@@ -38,6 +38,9 @@ import {
     renderEmployeeFilterChips,
 } from "./js/modules/sortFilter.js";
 
+import { showCalendarModal } from "./js/modules/calendar.js";
+import { showSeedDataModal } from "./js/modules/seedData.js";
+
 document.addEventListener("DOMContentLoaded", function () {
     initState();
 
@@ -399,4 +402,21 @@ document.addEventListener("DOMContentLoaded", function () {
                 renderEmployeesTable(getCurrentYear(), getCurrentMonth());
             }
         });
+    // ==================== КАЛЕНДАРЬ ОТПУСКОВ ====================
+
+    document
+        .getElementById("employeesBody")
+        .addEventListener("click", function (e) {
+            var target = e.target;
+            if (target.classList.contains("availability-btn")) {
+                var empId = target.getAttribute("data-emp-id");
+                showCalendarModal(empId, getCurrentYear(), getCurrentMonth());
+            }
+        });
+
+    // ==================== SEED DATA ====================
+
+    document.getElementById("seedBtn").addEventListener("click", function () {
+        showSeedDataModal(getCurrentYear(), getCurrentMonth());
+    });
 });
