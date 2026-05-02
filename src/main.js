@@ -23,6 +23,11 @@ import {
     updateEmployeeSalary,
 } from "./js/modules/crud.js";
 import {
+    showAssignPopup,
+    showProjectEmployeesModal,
+    showEmployeeAssignmentsModal,
+} from "./js/modules/assignments.js";
+import {
     validateProjectForm,
     validateEmployeeForm,
 } from "./js/modules/validation.js";
@@ -281,6 +286,43 @@ document.addEventListener("DOMContentLoaded", function () {
                 ) {
                     deleteEmployee(empId, getCurrentYear(), getCurrentMonth());
                 }
+            }
+
+            // Кнопка назначить
+            if (target.classList.contains("assign-btn")) {
+                var empId = target.getAttribute("data-emp-id");
+                showAssignPopup(
+                    empId,
+                    target,
+                    getCurrentYear(),
+                    getCurrentMonth(),
+                );
+            }
+
+            // Показать назначения сотрудника
+            if (target.classList.contains("show-assignments-btn")) {
+                var empId = target.getAttribute("data-emp-id");
+                showEmployeeAssignmentsModal(
+                    empId,
+                    getCurrentYear(),
+                    getCurrentMonth(),
+                );
+            }
+        });
+
+    document
+        .getElementById("projectsBody")
+        .addEventListener("click", function (e) {
+            var target = e.target;
+
+            // Показать сотрудников проекта
+            if (target.classList.contains("show-employees-btn")) {
+                var projectId = target.getAttribute("data-project-id");
+                showProjectEmployeesModal(
+                    projectId,
+                    getCurrentYear(),
+                    getCurrentMonth(),
+                );
             }
         });
 });
