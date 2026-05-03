@@ -14,12 +14,6 @@ import {
     renderEmployeesTable,
 } from "./js/modules/tables.js";
 import {
-    addProject,
-    deleteProject,
-    addEmployee,
-    deleteEmployee,
-} from "./js/modules/crud.js";
-import {
     validateProjectForm,
     validateEmployeeForm,
 } from "./js/modules/validation.js";
@@ -40,6 +34,14 @@ import {
 
 import { showCalendarModal } from "./js/modules/calendar.js";
 import { showSeedDataModal } from "./js/modules/seedData.js";
+import {
+    addProject,
+    deleteProject,
+    addEmployee,
+    deleteEmployee,
+    updateEmployeePosition,
+    updateEmployeeSalary,
+} from "./js/modules/crud.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     initState();
@@ -419,4 +421,128 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("seedBtn").addEventListener("click", function () {
         showSeedDataModal(getCurrentYear(), getCurrentMonth());
     });
+    // ==================== INLINE РЕДАКТИРОВАНИЕ ====================
+
+    document
+        .getElementById("employeesBody")
+        .addEventListener("click", function (e) {
+            var target = e.target;
+
+            // Клик по ячейке должности
+            if (target.classList.contains("editable-position")) {
+                var empId = target.getAttribute("data-emp-id");
+                var currentPosition = target.textContent;
+
+                // Создаём выпадающий список
+                var select = document.createElement("select");
+                var positions = [
+                    "Junior",
+                    "Middle",
+                    "Senior",
+                    "Lead",
+                    "Architect",
+                    "Business Manager",
+                ];
+                for (var i = 0; i < positions.length; i++) {
+                    var option = document.createElement("option");
+                    option.value = positions[i];
+                    option.textContent = positions[i];
+                    if (positions[i] === currentPosition)
+                        option.selected = true;
+                    select.appendChild(option);
+                }
+
+                target.textContent = "";
+                target.appendChild(select);
+                select.focus();
+
+                // Сохраняем при выборе
+                select.addEventListener("change", function () {
+                    updateEmployeePosition(
+                        empId,
+                        this.value,
+                        getCurrentYear(),
+                        getCurrentMonth(),
+                    );
+                });
+
+                // Сохраняем при потере фокуса
+                select.addEventListener("blur", function () {
+                    updateEmployeePosition(
+                        empId,
+                        this.value,
+                        getCurrentYear(),
+                        getCurrentMonth(),
+                    );
+                });
+            }
+
+            // Клик по ячейке зарплаты
+            if (target.classList.contains("editable-salary")) {
+                var empId = target.getAttribute("data-emp-id");
+                var data = getCurrentMonthData();
+                var currentSalary = 0;
+                for (var j = 0; j < data.employees.length; j++) {
+                    if (data.employees[j].id === empId) {
+                        currentSalary = data.employees[j].salary;
+                        break;
+                    }
+                }
+
+                // Создаём поле ввода
+                var input = document.createElement("input");
+                input.type = "number";
+                input.value = currentSalary;
+                input.style.cssText =
+                    "width:100%;padding:4px;border:1px solid #3498db;border-radius:4px;";
+
+                target.textContent = "";
+                target.appendChild(input);
+                input.focus();
+                input.select();
+
+                // Сохраняем при Enter
+                input.addEventListener("keydown", function (e) {
+                    if (e.key === "Enter") {
+                        if (parseFloat(this.value) > 0) {
+                            updateEmployeeSalary(
+                                empId,
+                                this.value,
+                                getCurrentYear(),
+                                getCurrentMonth(),
+                            );
+                        } else {
+                            renderEmployeesTable(
+                                getCurrentYear(),
+                                getCurrentMonth(),
+                            );
+                        }
+                    }
+                    // Отменяем при Escape
+                    if (e.key === "Escape") {
+                        renderEmployeesTable(
+                            getCurrentYear(),
+                            getCurrentMonth(),
+                        );
+                    }
+                });
+
+                // Сохраняем при потере фокуса
+                input.addEventListener("blur", function () {
+                    if (parseFloat(this.value) > 0) {
+                        updateEmployeeSalary(
+                            empId,
+                            this.value,
+                            getCurrentYear(),
+                            getCurrentMonth(),
+                        );
+                    } else {
+                        renderEmployeesTable(
+                            getCurrentYear(),
+                            getCurrentMonth(),
+                        );
+                    }
+                });
+            }
+        });
 });
