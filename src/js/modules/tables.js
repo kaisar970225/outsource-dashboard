@@ -333,10 +333,14 @@ export function renderEmployeesTable(year, month) {
             "<td>" +
             age +
             "</td>" +
-            "<td>" +
+            '<td class="editable-position" data-emp-id="' +
+            emp.id +
+            '">' +
             emp.position +
             "</td>" +
-            "<td>" +
+            '<td class="editable-salary" data-emp-id="' +
+            emp.id +
+            '">' +
             formatCurrency(emp.salary) +
             "</td>" +
             "<td>" +
